@@ -6,23 +6,18 @@ from scipy.stats import linregress
 import pandas as pd
 from tqdm import trange
 
-# --------------------------
-# PARÁMETROS DEL SISTEMA
-# --------------------------
-N = 200                  # Número de partículas
-L = 10.0                 # Tamaño de la caja (cúbica)
-T_total = 10.0           # Tiempo total de simulación
-dt = 0.01                # Paso de tiempo
-steps = int(T_total / dt)
-m = 1.0                  # Masa de cada partícula
 
-# Distribuciones
+N = 200                  
+L = 10.0                 
+T_total = 10.0           
+dt = 0.01                
+steps = int(T_total / dt)
+m = 1.0                  
+
 tipos = ['gaussiana', 'uniforme', 'pareto']
 colores = {'gaussiana': 'blue', 'uniforme': 'green', 'pareto': 'red'}
 
-# --------------------------
-# FUNCIONES AUXILIARES
-# --------------------------
+
 def init_positions(N, L):
     return np.random.uniform(0, L, size=(N, 3))
 
@@ -45,9 +40,7 @@ def apply_wall_collisions(R, V, L):
         R[:, dim] = np.clip(R[:, dim], 0, L)
     return R, V
 
-# --------------------------
-# CONFIGURACIÓN INICIAL
-# --------------------------
+
 simulaciones = {}
 
 for tipo in tipos:
@@ -62,9 +55,7 @@ for tipo in tipos:
         'times': [],
     }
 
-# --------------------------
-# ANIMACIÓN EN TIEMPO REAL
-# --------------------------
+
 fig = plt.figure(figsize=(15, 5))
 axes = [fig.add_subplot(1, 3, i+1, projection='3d') for i in range(3)]
 scatters = []
@@ -98,19 +89,17 @@ ani = FuncAnimation(fig, update, frames=steps, interval=20, blit=False)
 ani.save("difusion_multidistrib.gif", writer="pillow", fps=30)
 plt.show()
 
-# --------------------------
-# GRAFICAR SOLO LAS CURVAS MSD
-# --------------------------
+
 plt.figure(figsize=(10, 6))
 for tipo in tipos:
     t, msd = simulaciones[tipo]['times'], simulaciones[tipo]['MSD']
     plt.plot(t, msd, label=f'{tipo}', color=colores[tipo], linewidth=2)
 
-    # Guardar datos CSV
+    
     df = pd.DataFrame({'tiempo': t, 'MSD': msd})
     df.to_csv(f'msd_{tipo}.csv', index=False)
 
-    # Coeficiente de difusión
+    
     slope, intercept, r_value, p_value, std_err = linregress(t, msd)
     D = slope / 6
     print(f"{tipo.title():<10} | D ≈ {D:.4f} | R² = {r_value**2:.4f}")
